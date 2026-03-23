@@ -96,7 +96,7 @@ function ShowcasePage() {
             : (
               <iframe
                 src={pageContentUrl}
-                className="w-full h-full bg-current"
+                className="w-full h-full"
                 sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
               />
               )
