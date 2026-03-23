@@ -9,12 +9,11 @@ import auth from '~/api/auth'
 import folders from '~/api/folders'
 import tags from '~/api/tags'
 import config from '~/api/config'
+import iv from '~/api/iv'
 
 const app = new Hono<{ Bindings: Bindings }>()
 
-app.get('/', async (c) => {
-  return c.html(
-    `<!DOCTYPE html>
+const spaHtml = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -27,9 +26,9 @@ app.get('/', async (c) => {
 <body>
   <div id="root"></div>
 </body>
-</html>`,
-  )
-})
+</html>`
+
+app.get('/', c => c.html(spaHtml))
 
 const api = new Hono<HonoTypeUserInformation>()
 api.route('/showcase', showcase)
@@ -44,5 +43,9 @@ api.route('/tags', tags)
 api.route('/data', data)
 api.route('/config', config)
 app.route('/api', api)
+app.route('/iv', iv)
+
+// Catch-all: serve SPA for any unmatched route (handles client-side React Router paths)
+app.get('*', c => c.html(spaHtml))
 
 export default app
