@@ -38,6 +38,7 @@ function SettingDialog({ open, setOpen }: { open: boolean, setOpen: (open: boole
               <SelectContent>
                 <SelectItem value="light">{t('light')}</SelectItem>
                 <SelectItem value="dark">{t('dark')}</SelectItem>
+                <SelectItem value="mono">{t('mono')}</SelectItem>
                 <SelectItem value="system">{t('system')}</SelectItem>
               </SelectContent>
             </Select>

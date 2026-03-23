@@ -26,7 +26,7 @@ function Routes() {
       }), [view, setView, readMode, setReadMode])
     }
     >
-      <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+      <ThemeProvider defaultTheme="mono" storageKey="vite-ui-theme">
         <RouterProvider router={router} />
       </ThemeProvider>
     </AppContext.Provider>
