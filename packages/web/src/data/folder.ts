@@ -51,6 +51,16 @@ function restoreFolder(id: number): Promise<boolean> {
   })
 }
 
+function toggleFolderPublic(id: number, isPublic: number): Promise<boolean> {
+  return fetcher<boolean>('/folders/toggle_public', {
+    method: 'PUT',
+    body: {
+      id,
+      isPublic,
+    },
+  })
+}
+
 export {
   getAllFolder,
   deleteFolder,
@@ -58,4 +68,5 @@ export {
   updateFolder,
   queryDeletedFolder,
   restoreFolder,
+  toggleFolderPublic,
 }

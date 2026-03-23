@@ -11,6 +11,7 @@ import { useNavigate, useParams } from '~/router'
 import NotFound from '~/components/not-found'
 import LoadingWrapper from '~/components/loading-wrapper'
 import { deletePage, queryPage } from '~/data/page'
+import { queryPublicPages } from '~/data/public'
 import CardView from '~/components/card-view'
 import EmptyWrapper from '~/components/empty-wrapper'
 import ListView from '~/components/list-view'
@@ -20,6 +21,7 @@ import Header from '~/components/header'
 
 function FolderPage() {
   const { slug } = useParams('/folder/:slug')
+  const { authenticated } = useOutletContext<{ authenticated: boolean, keyword: string, searchTrigger: boolean, selectedTag: number | null, setKeyword: (keyword: string) => void, handleSearch: () => void }>()
 
   const scrollRef = useRef<Ref>(null)
   const { keyword, searchTrigger, selectedTag } = useOutletContext<{ keyword: string, searchTrigger: boolean, selectedTag: number | null }>()
@@ -27,17 +29,32 @@ function FolderPage() {
   const { data: pagesData, loading: pagesLoading, mutate: setPageData, loadingMore, reload } = useInfiniteScroll(
     async (d) => {
       const pageNumber = d?.pageNumber ?? 1
-      const res = await queryPage({
-        folderId: slug,
-        pageNumber,
-        pageSize: PAGE_SIZE,
-        keyword,
-        tagId: selectedTag,
-      })
-      return {
-        list: res.list ?? [],
-        pageNumber: pageNumber + 1,
-        total: res.total,
+      if (authenticated) {
+        const res = await queryPage({
+          folderId: slug,
+          pageNumber,
+          pageSize: PAGE_SIZE,
+          keyword,
+          tagId: selectedTag,
+        })
+        return {
+          list: res.list ?? [],
+          pageNumber: pageNumber + 1,
+          total: res.total,
+        }
+      }
+      else {
+        const res = await queryPublicPages({
+          folderId: Number(slug),
+          pageNumber,
+          pageSize: PAGE_SIZE,
+          keyword,
+        })
+        return {
+          list: res.list ?? [],
+          pageNumber: pageNumber + 1,
+          total: res.total,
+        }
       }
     },
     {
@@ -83,22 +100,24 @@ function FolderPage() {
             <EmptyWrapper empty={pagesData?.list.length === 0}>
               {view === 'card'
                 ? (
-                  <CardView pages={pagesData?.list} onPageDelete={handleDeletePage} />
+                  <CardView pages={pagesData?.list} onPageDelete={authenticated ? handleDeletePage : undefined} />
                   )
                 : (
                   <ListView pages={pagesData?.list} onItemClick={handleItemClick} imgPreview>
-                    {page => (
-                      <Button
-                        variant="link"
-                        size="icon"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleDeletePage(page)
-                        }}
-                      >
-                        <Trash className="h-4 w-4" />
-                      </Button>
-                    )}
+                    {page => authenticated
+                      ? (
+                        <Button
+                          variant="link"
+                          size="icon"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleDeletePage(page)
+                          }}
+                        >
+                          <Trash className="h-4 w-4" />
+                        </Button>
+                        )
+                      : null}
                   </ListView>
                   )}
             </EmptyWrapper>

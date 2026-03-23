@@ -7,8 +7,10 @@ import IframePageContent from '~/components/iframe-page-content'
 import LoadingWrapper from '~/components/loading-wrapper'
 import ReadabilityPageContent from '~/components/readability-page-content'
 import { deletePage, getPageDetail } from '~/data/page'
+import { getPublicPageContent, getPublicPageDetail } from '~/data/public'
 import { useObjectURL } from '~/hooks/useObjectUrl'
 import { useNavigate, useParams } from '~/router'
+import { isAuthenticated } from '~/utils/router'
 import AppContext from '~/store/app'
 
 async function getPageContent(pageId: string | undefined) {
@@ -29,6 +31,7 @@ function ArchivePage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { slug } = useParams('/page/:slug')
+  const authenticated = isAuthenticated()
 
   useEffect(() => {
     if (!slug) {
@@ -37,7 +40,7 @@ function ArchivePage() {
   })
 
   const { data: pageDetail } = useRequest(
-    getPageDetail,
+    authenticated ? getPageDetail : getPublicPageDetail,
     {
       onSuccess: (pageDetail) => {
         if (!pageDetail) {
@@ -58,8 +61,9 @@ function ArchivePage() {
   const { objectURL: pageContentUrl, setObject } = useObjectURL(null)
   const { data: pageHtml, loading: pageLoading } = useRequest(
     async () => {
-      const pageHtml = await getPageContent(slug)
-      return pageHtml
+      if (authenticated)
+        return getPageContent(slug)
+      return getPublicPageContent(slug ?? '')
     },
     {
       onSuccess: (pageHtml) => {
@@ -92,17 +96,16 @@ function ArchivePage() {
           <ArrowLeft className="w-5 h-5" />
         </Button>
         <div className="flex space-x-2">
-          <a
-            href={pageContentUrl ?? ''}
-            download={`${pageDetail?.title ?? 'Download'}.html`}
-          >
-            <Button
-              variant="default"
-              size="sm"
+          {authenticated && (
+            <a
+              href={pageContentUrl ?? ''}
+              download={`${pageDetail?.title ?? 'Download'}.html`}
             >
-              {t('download')}
-            </Button>
-          </a>
+              <Button variant="default" size="sm">
+                {t('download')}
+              </Button>
+            </a>
+          )}
 
           <Button
             variant="secondary"
@@ -111,13 +114,16 @@ function ArchivePage() {
           >
             {readMode ? t('open-iframe-mode') : t('open-read-mode')}
           </Button>
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={handleDeletePage}
-          >
-            <Trash className="w-5 h-5" />
-          </Button>
+
+          {authenticated && (
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={handleDeletePage}
+            >
+              <Trash className="w-5 h-5" />
+            </Button>
+          )}
         </div>
       </nav>
       <div className="flex-1 p-4 w-full">

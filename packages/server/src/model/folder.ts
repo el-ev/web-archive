@@ -88,6 +88,30 @@ async function getFolderById(DB: D1Database, options: { id: number, isDeleted?: 
   return folder
 }
 
+async function selectPublicFolders(DB: D1Database) {
+  const sql = `
+    SELECT
+      *
+    FROM folders
+    WHERE isPublic = 1 AND isDeleted = 0
+  `
+  const sqlResult = await DB.prepare(sql).all<Folder>()
+  if (sqlResult.error) {
+    throw sqlResult.error
+  }
+  return sqlResult.results
+}
+
+async function updateFolderPublic(DB: D1Database, options: { id: number, isPublic: number }) {
+  const sql = `
+    UPDATE folders
+    SET isPublic = ?
+    WHERE id = ?
+  `
+  const sqlResult = await DB.prepare(sql).bind(options.isPublic, options.id).run()
+  return sqlResult
+}
+
 async function queryDeletedFolders(DB: D1Database) {
   const sql = `
     SELECT 
@@ -129,6 +153,8 @@ export {
   insertFolder,
   updateFolder,
   selectAllFolders,
+  selectPublicFolders,
+  updateFolderPublic,
   getFolderById,
   queryDeletedFolders,
   selectDeletedFolderTotalCount,

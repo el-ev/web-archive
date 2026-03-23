@@ -7,8 +7,10 @@ import SideBar from '~/components/side-bar'
 import Hamburger from '~/components/hamburger'
 import { getAllTag } from '~/data/tag'
 import TagContext from '~/store/tag'
+import { isAuthenticated } from '~/utils/router'
 
 function Layout() {
+  const authenticated = isAuthenticated()
   const [keyword, setKeyword] = useState('')
   // todo refactor rename searchTrigger
   const [searchTrigger, setSearchTrigger] = useState(false)
@@ -19,7 +21,7 @@ function Layout() {
   const {
     data: tagCache,
     runAsync: refreshTagCache,
-  } = useRequest(getAllTag)
+  } = useRequest(getAllTag, { ready: authenticated })
   const [selectedTag, setSelectedTag] = useState<number | null>(null)
   const setSelectedTagAndReload = (tag: number | null) => {
     setSelectedTag(tag)
@@ -41,12 +43,13 @@ function Layout() {
         <SidebarProvider>
           <div className="flex-1 flex">
             <SideBar
+              authenticated={authenticated}
               selectedTag={selectedTag}
               setSelectedTag={setSelectedTagAndReload}
             />
             <div className="flex-1">
               <Hamburger className="lg:hidden block fixed top-[50%] left-0 cursor-pointer z-50" />
-              <Outlet context={{ keyword, searchTrigger, handleSearch, setKeyword, selectedTag }} />
+              <Outlet context={{ keyword, searchTrigger, handleSearch, setKeyword, selectedTag, authenticated }} />
             </div>
           </div>
         </SidebarProvider>

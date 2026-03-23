@@ -96,5 +96,10 @@
   "please-enter-a-valid-api-url": "请输入有效的 API URL",
   "select-generate-tag-language": "选择生成标签的语言",
   "select-service-type": "选择服务类型",
-  "mono": "Mono"
+  "mono": "Mono",
+  "make-public": "公开",
+  "make-private": "设为私密",
+  "browse-as-guest": "以访客身份浏览",
+  "guest-home-hint": "从左侧选择公开文件夹以浏览内容。",
+  "login-link": "登录"
 }

@@ -81,6 +81,14 @@ export default function LoginPage() {
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? t('logging-in') : t('login')}
               </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                className="w-full"
+                onClick={() => router.navigate('/')}
+              >
+                {t('browse-as-guest')}
+              </Button>
             </div>
           </form>
         </CardContent>

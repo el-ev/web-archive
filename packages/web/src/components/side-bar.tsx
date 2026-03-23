@@ -1,4 +1,4 @@
-import { HomeIcon, LogOut, Settings, SquareLibrary, Trash2 } from 'lucide-react'
+import { LogOut, Settings, SquareLibrary, Trash2 } from 'lucide-react'
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@web-archive/shared/components/side-bar'
 import { useEffect, useState } from 'react'
 import { isNumberString } from '@web-archive/shared/utils'
@@ -11,11 +11,12 @@ import SidebarTagMenu from './side-bar-tag-menu'
 import { Link, useNavigate, useParams } from '~/router'
 
 interface SidebarProps {
+  authenticated: boolean
   selectedTag: number | null
   setSelectedTag: (tag: number | null) => void
 }
 
-function Component({ selectedTag, setSelectedTag }: SidebarProps) {
+function Component({ authenticated, selectedTag, setSelectedTag }: SidebarProps) {
   const { t } = useTranslation()
   const navigate = useNavigate()
 
@@ -38,7 +39,9 @@ function Component({ selectedTag, setSelectedTag }: SidebarProps) {
 
   return (
     <Sidebar>
-      <SettingDialog open={settingDialogOpen} setOpen={setSettingDialogOpen} />
+      {authenticated && (
+        <SettingDialog open={settingDialogOpen} setOpen={setSettingDialogOpen} />
+      )}
 
       <SidebarHeader>
         <div className="flex justify-center items-center">
@@ -54,70 +57,70 @@ function Component({ selectedTag, setSelectedTag }: SidebarProps) {
 
       <SidebarContent className="mt-4 h-64 overflow-hidden">
         <ScrollArea className="h-full overflow-auto">
-          <SidebarMenu>
-            <SidebarMenuButton
-              className="w-full justify-between"
-              asChild
-            >
-              <Link to="/">
-                <div className="flex items-center">
-                  <HomeIcon className="mr-2 h-4 w-4" />
-                  {t('home')}
-                </div>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenu>
           <SidebarFolderMenu
+            authenticated={authenticated}
             openedFolder={openedFolder}
             setOpenedFolder={setOpenedFolder}
           />
-          <SidebarTagMenu
-            selectedTag={selectedTag}
-            setSelectedTag={setSelectedTag}
-            selectedFolder={openedFolder}
-          >
-          </SidebarTagMenu>
+          {authenticated && (
+            <SidebarTagMenu
+              selectedTag={selectedTag}
+              setSelectedTag={setSelectedTag}
+              selectedFolder={openedFolder}
+            />
+          )}
         </ScrollArea>
-
       </SidebarContent>
 
       <SidebarFooter>
         <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild>
-              <Link to="/showcase/folder">
-                <SquareLibrary className="mr-2 h-4 w-4" />
-                Showcase
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton onClick={() => {
-              setSettingDialogOpen(true)
-            }}
-            >
-              <Settings className="mr-2 h-4 w-4" />
-              {t('settings')}
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild>
-              <Link to="/trash">
-                <Trash2 className="mr-2 h-4 w-4" />
-                {t('trash')}
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton onClick={() => {
-              setOpenedFolder(null)
-              handleLogout()
-            }}
-            >
-              <LogOut className="mr-2 h-4 w-4" />
-              {t('logout')}
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+          {authenticated
+            ? (
+              <>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <Link to="/showcase/folder">
+                      <SquareLibrary className="mr-2 h-4 w-4" />
+                      Showcase
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton onClick={() => setSettingDialogOpen(true)}>
+                    <Settings className="mr-2 h-4 w-4" />
+                    {t('settings')}
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <Link to="/trash">
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      {t('trash')}
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton onClick={() => {
+                    setOpenedFolder(null)
+                    handleLogout()
+                  }}
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    {t('logout')}
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </>
+              )
+            : (
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link to="/login">
+                    <LogOut className="mr-2 h-4 w-4 rotate-180" />
+                    {t('login-link')}
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              )}
         </SidebarMenu>
       </SidebarFooter>
 

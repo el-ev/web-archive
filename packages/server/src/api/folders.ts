@@ -4,7 +4,7 @@ import { isNil, isNumberString } from '@web-archive/shared/utils'
 import { queryPage } from '~/model/page'
 import type { HonoTypeUserInformation } from '~/constants/binding'
 import result from '~/utils/result'
-import { checkFolderExists, deleteFolderById, insertFolder, queryDeletedFolders, selectAllFolders, updateFolder } from '~/model/folder'
+import { checkFolderExists, deleteFolderById, insertFolder, queryDeletedFolders, selectAllFolders, updateFolder, updateFolderPublic } from '~/model/folder'
 
 const app = new Hono<HonoTypeUserInformation>()
 
@@ -114,6 +114,30 @@ app.post(
   async (c) => {
     const folders = await queryDeletedFolders(c.env.DB)
     return c.json(result.success(folders))
+  },
+)
+
+app.put(
+  '/toggle_public',
+  validator('json', (value, c) => {
+    if (isNil(value.id) || !isNumberString(value.id)) {
+      return c.json(result.error(400, 'ID is required'))
+    }
+    if (value.isPublic !== 0 && value.isPublic !== 1) {
+      return c.json(result.error(400, 'isPublic must be 0 or 1'))
+    }
+    return {
+      id: Number(value.id),
+      isPublic: value.isPublic as number,
+    }
+  }),
+  async (c) => {
+    const { id, isPublic } = c.req.valid('json')
+    const sqlResult = await updateFolderPublic(c.env.DB, { id, isPublic })
+    if (sqlResult.meta.changes === 0) {
+      return c.json(result.error(400, 'Folder not found'))
+    }
+    return c.json(result.success(true))
   },
 )
 

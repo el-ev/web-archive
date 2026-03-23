@@ -5,6 +5,7 @@ import type { Page } from '@web-archive/shared/types'
 import { ScrollArea } from '@web-archive/shared/components/scroll-area'
 import { useOutletContext } from 'react-router-dom'
 import { isNil, isNotNil } from '@web-archive/shared/utils'
+import { useTranslation } from 'react-i18next'
 import { useMediaQuery } from '~/hooks/useMediaQuery'
 import PageDataPieCard from '~/components/page-data-pie-card'
 import R2UsageCard from '~/components/r2-usage-card'
@@ -16,6 +17,15 @@ import LoadingWrapper from '~/components/loading-wrapper'
 import CardView from '~/components/card-view'
 import LoadingMore from '~/components/loading-more'
 import { useShouldShowRecent } from '~/hooks/useShouldShowRecent'
+
+function GuestHome() {
+  const { t } = useTranslation()
+  return (
+    <div className="flex flex-col items-center justify-center h-[calc(100vh-58px)] text-muted-foreground text-sm">
+      <p>{t('guest-home-hint')}</p>
+    </div>
+  )
+}
 
 function RecentSavePageView() {
   const { data: r2Data, loading: r2Loading } = useRequest(getR2Usage)
@@ -139,7 +149,7 @@ function SearchiPageView() {
 }
 
 function ArchiveHome() {
-  const { keyword, selectedTag, setKeyword, handleSearch } = useOutletContext<{ keyword: string, searchTrigger: boolean, selectedTag: number | null, setKeyword: (keyword: string) => void, handleSearch: () => void }>()
+  const { keyword, selectedTag, setKeyword, handleSearch, authenticated } = useOutletContext<{ keyword: string, searchTrigger: boolean, selectedTag: number | null, setKeyword: (keyword: string) => void, handleSearch: () => void, authenticated: boolean }>()
   const [showSearchView, setShowSearchView] = useState(false)
   const handleStartSearch = () => {
     if (isNil(keyword) || keyword === '') {
@@ -153,6 +163,15 @@ function ArchiveHome() {
   useEffect(() => {
     setShowSearchView(isNotNil(selectedTag))
   }, [selectedTag])
+
+  if (!authenticated) {
+    return (
+      <div className="flex flex-col flex-1">
+        <GuestHome />
+      </div>
+    )
+  }
+
   return (
     <div className="flex flex-col flex-1">
       <Header keyword={keyword} setKeyword={setKeyword} handleSearch={handleStartSearch}></Header>

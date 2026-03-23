@@ -12,7 +12,8 @@ import { useTranslation } from 'react-i18next'
 import NewFolderDialog from './new-folder-dialog'
 import EditFolderDialog from './edit-folder-dialog'
 import Folder from './folder'
-import { deleteFolder, getAllFolder } from '~/data/folder'
+import { deleteFolder, getAllFolder, toggleFolderPublic } from '~/data/folder'
+import { getPublicFolders } from '~/data/public'
 import emitter from '~/utils/emitter'
 import { Link, useNavigate } from '~/router'
 
@@ -27,18 +28,21 @@ function getNextFolderId(folders: Array<FolderType>, index: number) {
 }
 
 interface SidebarFolderCollapseProps {
+  authenticated: boolean
   openedFolder: number | null
   setOpenedFolder: (id: number) => void
   className?: string
 }
 
-function SidebarFolderMenu({ openedFolder, setOpenedFolder, className }: SidebarFolderCollapseProps) {
+function SidebarFolderMenu({ authenticated, openedFolder, setOpenedFolder, className }: SidebarFolderCollapseProps) {
   const { t } = useTranslation()
   const navigate = useNavigate()
 
   const [isFoldersCollapseOpen, setIsFoldersCollapseOpen] = useState(true)
 
-  const { data: folders, refresh, mutate: setFolders, loading: foldersLoading } = useRequest(getAllFolder)
+  const { data: folders, refresh, mutate: setFolders, loading: foldersLoading } = useRequest(
+    authenticated ? getAllFolder : getPublicFolders,
+  )
 
   emitter.on('refreshSideBar', refresh)
 
@@ -69,16 +73,31 @@ function SidebarFolderMenu({ openedFolder, setOpenedFolder, className }: Sidebar
     setEditFolderDialogOpen(true)
   }
 
+  const handleTogglePublic = async (folderId: number, isPublic: number) => {
+    try {
+      await toggleFolderPublic(folderId, isPublic)
+      setFolders(folders?.map(f => f.id === folderId ? { ...f, isPublic } : f) ?? [])
+      toast.success(t('success'))
+    }
+    catch {
+      toast.error(t('failed'))
+    }
+  }
+
   const [newFolderDialogOpen, setNewFolderDialogOpen] = useState(false)
   return (
     <SidebarMenu className={className}>
-      <NewFolderDialog afterSubmit={refresh} open={newFolderDialogOpen} setOpen={setNewFolderDialogOpen} />
-      <EditFolderDialog
-        afterSubmit={refresh}
-        open={editFolderDialogOpen}
-        setOpen={setEditFolderDialogOpen}
-        editFolder={editFolder}
-      />
+      {authenticated && (
+        <>
+          <NewFolderDialog afterSubmit={refresh} open={newFolderDialogOpen} setOpen={setNewFolderDialogOpen} />
+          <EditFolderDialog
+            afterSubmit={refresh}
+            open={editFolderDialogOpen}
+            setOpen={setEditFolderDialogOpen}
+            editFolder={editFolder}
+          />
+        </>
+      )}
       <Collapsible
         open={isFoldersCollapseOpen}
         onOpenChange={setIsFoldersCollapseOpen}
@@ -111,22 +130,24 @@ function SidebarFolderMenu({ openedFolder, setOpenedFolder, className }: Sidebar
                             name={folder.name}
                             id={folder.id}
                             isOpen={openedFolder === folder.id}
-                            onDelete={handleDeleteFolder}
-                            onEdit={handleEditFolder}
+                            isPublic={folder.isPublic}
+                            onDelete={authenticated ? handleDeleteFolder : undefined}
+                            onEdit={authenticated ? handleEditFolder : undefined}
+                            onTogglePublic={authenticated ? handleTogglePublic : undefined}
                           />
-
                         </SidebarMenuButton>
                       </Link>
-
                     </SidebarMenuItem>
                   ))
                 )}
-            <SidebarMenuItem>
-              <Button variant="ghost" className="w-full justify-start" onClick={() => setNewFolderDialogOpen(true)}>
-                <Plus className="mr-2 h-4 w-4" />
-                {t('add-folder')}
-              </Button>
-            </SidebarMenuItem>
+            {authenticated && (
+              <SidebarMenuItem>
+                <Button variant="ghost" className="w-full justify-start" onClick={() => setNewFolderDialogOpen(true)}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  {t('add-folder')}
+                </Button>
+              </SidebarMenuItem>
+            )}
           </SidebarMenuSub>
 
         </CollapsibleContent>

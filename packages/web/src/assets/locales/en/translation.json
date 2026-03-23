@@ -96,5 +96,10 @@
   "select-service-type": "Select Service Type",
   "select-generate-tag-language": "Select Generate Tag Language",
   "model": "Model",
-  "mono": "Mono"
+  "mono": "Mono",
+  "make-public": "Make Public",
+  "make-private": "Make Private",
+  "browse-as-guest": "Browse as Guest",
+  "guest-home-hint": "Select a public folder from the sidebar to browse.",
+  "login-link": "Login"
 }

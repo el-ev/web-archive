@@ -17,6 +17,7 @@ type Folder = {
   id: number
   name: string
   isDeleted: number
+  isPublic: number
   deletedAt: Date | null
   createdAt: Date
   updatedAt: Date

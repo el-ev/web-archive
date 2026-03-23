@@ -2,7 +2,7 @@ import { Button } from '@web-archive/shared/components/button'
 import { useKeyPress, useRequest } from 'ahooks'
 import { ArrowLeft, ArrowRight, House } from 'lucide-react'
 import { useEffect } from 'react'
-import PoweredBy from '~/components/powerd-by'
+// import PoweredBy from '~/components/powerd-by'
 import { getNextShowcasePageId } from '~/data/showcase'
 import { useNavigate, useParams } from '~/router'
 
@@ -76,7 +76,7 @@ function ShowcasePage() {
         <Button variant="ghost" onClick={goHome} className="m-2">
           <House className="w-8 h-8" />
         </Button>
-        <PoweredBy />
+        {/* <PoweredBy /> */}
       </div>
       <div className="flex flex-1 pt-20">
         <nav className="p-2 justify-between items-center hidden xl:flex">
