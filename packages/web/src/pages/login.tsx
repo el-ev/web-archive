@@ -55,7 +55,7 @@ export default function LoginPage() {
       />
       <Card className="w-[450px]">
         <CardHeader>
-          <CardTitle>Web Archive</CardTitle>
+          <CardTitle>Archive</CardTitle>
           <CardDescription>{t('please-enter-your-key-to-login')}</CardDescription>
         </CardHeader>
         <CardContent>
